@@ -4,13 +4,18 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Run Project
+Make sure the Laravel Backend is running on http://127.0.0.1:8000
+If not refer to: [backend](https://github.com/Fredricknjeri/sleek-properties-backend)
 
-A few resources to get you started if this is your first Flutter project:
+2. Run flutter pub get after you clone the repository
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. Run the following command to start your Flutter app:
+flutter run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+If you encounter any issues, use flutter doctor to check for missing dependencies:
+
+Feel free to reach out: fredricknjeri64@gmail.com
+
+
+
