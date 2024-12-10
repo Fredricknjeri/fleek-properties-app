@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'add_property_screen.dart';
-import '../widgets/property_card.dart';
-import '../models/property.dart';
-import 'property_details_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../blocs/property_bloc.dart';
+import '../blocs/property_event.dart';
+import '../blocs/property_state.dart';
+import '../models/property.dart';
+import '../widgets/property_card.dart';
+import 'add_property_screen.dart';
+import 'property_details_screen.dart';
 
 class PropertyListScreen extends StatefulWidget {
   const PropertyListScreen({Key? key}) : super(key: key);
@@ -13,24 +17,11 @@ class PropertyListScreen extends StatefulWidget {
 }
 
 class _PropertyListScreenState extends State<PropertyListScreen> {
-  final List<Property> _properties = [];
-
-  void _addProperty(Property property) {
-    setState(() {
-      _properties.add(property);
-    });
-  }
-
-  void _updateProperty(int index, Property updatedProperty) {
-    setState(() {
-      _properties[index] = updatedProperty;
-    });
-  }
-
-  void _deleteProperty(int index) {
-    setState(() {
-      _properties.removeAt(index);
-    });
+  @override
+  void initState() {
+    super.initState();
+    // Trigger the FetchProperties event to load properties when the screen initializes
+    context.read<PropertyBloc>().add(FetchProperties());
   }
 
   void _navigateToAddProperty() {
@@ -38,19 +29,27 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => AddPropertyScreen(
-          onSave: (property) => _addProperty(property),
+          onSave: (property) {
+            // Trigger the AddProperty event
+            context.read<PropertyBloc>().add(AddProperty(property));
+          },
         ),
       ),
     );
   }
 
-  void _navigateToUpdateProperty(int index, Property property) {
+  void _navigateToUpdateProperty(Property property) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddPropertyScreen(
           property: property,
-          onSave: (updatedProperty) => _updateProperty(index, updatedProperty),
+          onSave: (updatedProperty) {
+            // Trigger the UpdateProperty event
+            context
+                .read<PropertyBloc>()
+                .add(UpdateProperty(property.id!, updatedProperty));
+          },
         ),
       ),
     );
@@ -71,24 +70,42 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
       appBar: AppBar(
         title: const Text("Property List"),
       ),
-      body: _properties.isEmpty
-          ? const Center(
-              child: Text("No properties available. Add some!"),
-            )
-          : ListView.builder(
-              itemCount: _properties.length,
-              itemBuilder: (context, index) {
-                final property = _properties[index];
-                return GestureDetector(
-                  onTap: () => _navigateToPropertyDetails(property),
-                  child: PropertyCard(
-                    property: property,
-                    onEdit: () => _navigateToUpdateProperty(index, property),
-                    onDelete: () => _deleteProperty(index),
-                  ),
-                );
-              },
-            ),
+      body: BlocBuilder<PropertyBloc, PropertyState>(
+        builder: (context, state) {
+          if (state is PropertyLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is PropertyLoaded) {
+            final properties = state.properties;
+            return properties.isEmpty
+                ? const Center(
+                    child: Text("No properties available. Add some!"))
+                : ListView.builder(
+                    itemCount: properties.length,
+                    itemBuilder: (context, index) {
+                      final property = properties[index];
+                      return GestureDetector(
+                        onTap: () => _navigateToPropertyDetails(property),
+                        child: PropertyCard(
+                          property: property,
+                          onEdit: () => _navigateToUpdateProperty(property),
+                          onDelete: () {
+                            // Trigger the DeleteProperty event
+                            context
+                                .read<PropertyBloc>()
+                                .add(DeleteProperty(property.id!));
+                          },
+                        ),
+                      );
+                    },
+                  );
+          } else if (state is PropertyError) {
+            return Center(
+              child: Text("Failed to load properties: ${state.message}"),
+            );
+          }
+          return const Center(child: Text("An unexpected error occurred."));
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddProperty,
         child: const Icon(Icons.add),

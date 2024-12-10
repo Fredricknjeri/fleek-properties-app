@@ -19,11 +19,12 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   final _imagesController = TextEditingController();
 
   late String title, description, address, status;
-  late double price;
+  late String price;
   late int bedrooms, bathrooms, squareFeet;
   late List<String> images;
   final ImagePicker _picker = ImagePicker();
   List<File> _pickedImages = [];
+  final List<String> statusOptions = ['available', 'rented', 'FOR SALE'];
 
   @override
   void initState() {
@@ -38,12 +39,12 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
       bathrooms = widget.property!.bathrooms;
       squareFeet = widget.property!.squareFeet;
       status = widget.property!.status;
-      images = widget.property!.images;
+      images = widget.property!.images!;
       _imagesController.text = images.join(',');
     } else {
       // Initialize empty values for add
       title = description = address = status = '';
-      price = 0.0;
+      price = "0.0";
       bedrooms = bathrooms = squareFeet = 0;
       images = [];
     }
@@ -63,7 +64,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     setState(() {
       _pickedImages.addAll(pickedFiles.map((file) => File(file.path)));
     });
-    }
+  }
 
   void _addImageUrl() {
     if (_imagesController.text.isNotEmpty) {
@@ -78,7 +79,8 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.property == null ? "Add Property" : "Update Property"),
+        title:
+            Text(widget.property == null ? "Add Property" : "Update Property"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -102,12 +104,41 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                 label: 'Price',
                 initialValue: price.toString(),
                 keyboardType: TextInputType.number,
-                onSaved: (value) => price = double.parse(value!),
+                onSaved: (value) => price = value!,
               ),
               _buildStyledTextFormField(
                 label: 'Address',
                 initialValue: address,
                 onSaved: (value) => address = value!,
+              ),
+                   Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: DropdownButtonFormField<String>(
+                  value: status,
+                  items: statusOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      status = newValue!;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || !statusOptions.contains(value)) {
+                      return 'Please select a valid status';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
               ),
               _buildStyledTextFormField(
                 label: 'Bedrooms',
@@ -142,13 +173,13 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                     ElevatedButton.icon(
                       onPressed: _takePhoto,
                       icon: const Icon(Icons.camera),
-                      label: const Text('Take Photo'),
+                      label: const Text(''),
                     ),
                     const SizedBox(width: 4),
                     ElevatedButton.icon(
                       onPressed: _uploadFromGallery,
                       icon: const Icon(Icons.image),
-                      label: const Text('Upload from Gallery'),
+                      label: const Text('Gallery'),
                     ),
                   ],
                 ),
@@ -204,7 +235,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                         Property(
                           title: title,
                           description: description,
-                          price: price,
+                          price: price.toString(),
                           address: address,
                           bedrooms: bedrooms,
                           bathrooms: bathrooms,

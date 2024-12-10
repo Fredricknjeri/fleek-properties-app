@@ -27,14 +27,14 @@ class PropertyCard extends StatelessWidget {
             height: 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: property.images.length,
+              itemCount: property.images!.length,
               itemBuilder: (context, index) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.network(
-                    property.images[index],
+                    property.images![index],
                     fit: BoxFit.cover,
-                    width: MediaQuery.of(context).size.width * 0.8,
+                    width: MediaQuery.of(context).size.width * 0.95,
                   ),
                 );
               },
@@ -47,17 +47,18 @@ class PropertyCard extends StatelessWidget {
               children: [
                 Text(
                   property.title,
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 Text(property.description),
-                Text("Price: \$${property.price}"),
+                // Text("Price: \$${property.price}"),
                 Text("Address: ${property.address}"),
-                Text("${property.bedrooms} Bedrooms | ${property.bathrooms} Bathrooms"),
-                Text("Size: ${property.squareFeet} sq. ft."),
+                // Text("${property.bedrooms} Bedrooms | ${property.bathrooms} Bathrooms"),
+                // Text("Size: ${property.squareFeet} sq. ft."),
                 Text("Status: ${property.status}"),
               ],
             ),
           ),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -72,6 +73,7 @@ class PropertyCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20,),
         ],
       ),
     );

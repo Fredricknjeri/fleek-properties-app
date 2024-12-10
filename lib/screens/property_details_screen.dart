@@ -28,7 +28,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                   autoPlay: true,
                   enlargeCenterPage: true,
                 ),
-                items: property.images.map((image) {
+                items: property.images!.map((image) {
                   return Builder(
                     builder: (BuildContext context) {
                       return ClipRRect(
@@ -87,7 +87,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                       const Icon(Icons.attach_money, color: Colors.green),
                       const SizedBox(width: 10),
                       Text(
-                        "\$${property.price.toStringAsFixed(2)}",
+                        "\$${property.price}",
                         style:
                             Theme.of(context).textTheme.displaySmall?.copyWith(
                                   fontWeight: FontWeight.bold,

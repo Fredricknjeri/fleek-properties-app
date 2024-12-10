@@ -6,15 +6,37 @@ class PropertyRepository {
 
   Future<List<Property>> fetchProperties() async {
     final response = await _dio.get('/properties');
-    return (response.data as List).map((json) => Property.fromJson(json)).toList();
+    return (response.data as List)
+        .map((json) => Property.fromJson(json))
+        .toList();
   }
 
   Future<void> createProperty(Property property) async {
-    await _dio.post('/properties', data: property.toJson());
+    try {
+      // Ensure the price is an integer before sending it
+      final data = property.toJson();
+      data['price'] = int.tryParse(data['price'].toString()) ?? 0;
+
+      await _dio.post('/properties', data: data);
+    } catch (e) {
+      if (e is DioError) {
+        print('Error response: ${e.response?.data}');
+      }
+    }
   }
 
   Future<void> updateProperty(int id, Property property) async {
-    await _dio.put('/properties/$id', data: property.toJson());
+    try {
+      // Ensure the price is an integer before sending it
+      final data = property.toJson();
+      data['price'] = int.tryParse(data['price'].toString()) ?? 0;
+
+      await _dio.patch('/properties/$id', data: data);
+    } catch (e) {
+      if (e is DioError) {
+        print('Error response: ${e.response?.data}');
+      }
+    }
   }
 
   Future<void> deleteProperty(int id) async {
@@ -22,8 +44,7 @@ class PropertyRepository {
   }
 
   Future<Property> fetchPropertyById(int id) async {
-  final response = await _dio.get('/properties/$id');
-  return Property.fromJson(response.data);
-}
-
+    final response = await _dio.get('/properties/$id');
+    return Property.fromJson(response.data);
+  }
 }
